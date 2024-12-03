@@ -14,7 +14,7 @@ function WaitBeforeStart {
 function FirstStage {
     clearscreen.
 
-    print "Набираем высоту до 30км и наклон ракеты".
+    print "Набираем высоту до 30км".
     lock steering to heading(90, 90).
     lock throttle to 1.
     stage.
@@ -39,13 +39,13 @@ function SecondStage {
     print "Произвожу запуск второй ступени".
     lock throttle to 1.
 
-    wait until ship:altitude > 80000.
+    wait until ship:altitude > 70000.
     print "Вышли за пределы орбиты Земли. Произвожу сброс обтекателей".
     stage.
 
     wait until ship:apoapsis > 202500.
-    wait 5.
     lock throttle to 0.
+    wait 1.
     stage.
 }
 
@@ -60,14 +60,15 @@ function CircleOrbit {
         print "До апоцентра осталось: " + eta:apoapsis + " секунд".
         wait 0.2.
     }
-    lock throttle to 1.
 
+    lock throttle to 1.
     until ship:periapsis > 200000 {
         clearscreen.
         print "Апоцентр: " + ship:apoapsis + " метров".
         print "Перицентр: " + ship:periapsis + " метров".
         wait 0.2.
     }
+    
     lock throttle to 0.
     wait 3.
     stage.
