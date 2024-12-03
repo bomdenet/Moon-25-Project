@@ -16,14 +16,13 @@ class Ship:
     apoapsis = 0
     periapsis = 0
 
+t = 0
+ss = "время, масса, высота, скорость"
+while Ship.periapsis < 200000:
+    ss += f"\n{t:.2f}, {Ship.massa:.2f}, {Ship.height:.2f}, {Ship.speed:.2f}"
+    t += 0.02
+    time.sleep(0.02)
 
-def CreateFile():
-    ss = "время, масса, высота, скорость"
-    while Ship.periapsis < 200000:
-        ss += f"\n{Ship.t:.2f}, {Ship.massa:.2f}, {Ship.height:.2f}, {Ship.speed:.2f}"
-        t += 0.02
-        time.sleep(0.02)
-
-    f = open("Files/Data/MathModel_Stats.txt", "w")
-    f.write(ss)
-    print("Файл сохранён")
+f = open("Files/Data/MathModel_Stats.txt", "w", encoding="UTF-8")
+f.write(ss)
+print("Файл сохранён")
