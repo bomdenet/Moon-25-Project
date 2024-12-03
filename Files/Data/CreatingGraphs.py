@@ -29,7 +29,7 @@ time = []
 massa = []
 height = []
 speed = []
-with open("Files/Data/Stats.txt", "r") as f:
+with open("Files/Data/KSP_Stats.txt", "r") as f:
     ss = f.read().split("\n")[1::]
     for i in range(len(ss)):
         ss[i] = ss[i].split(", ")

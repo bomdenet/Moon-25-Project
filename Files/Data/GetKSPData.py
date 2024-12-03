@@ -13,10 +13,10 @@ earth = conn.space_center.bodies["Kerbin"]
 ss = "время, масса, высота, скорость"
 t = 0
 while vessel.orbit.periapsis_altitude < 200000:
-    ss += f"\n{str(t)}, {vessel.mass * 1000}, {vessel.flight().mean_altitude}, {numpy.linalg.norm(vessel.velocity(earth.reference_frame))}"
+    ss += f"\n{t:.2f}, {vessel.mass:.2f}, {vessel.flight().mean_altitude:.2f}, {numpy.linalg.norm(vessel.velocity(earth.reference_frame)):.2f}"
     t += 0.02
     time.sleep(0.02)
 
-f = open("Files/Data/Stats.txt", "w")
+f = open("Files/Data/KSP_Stats.txt", "w")
 f.write(ss)
 print("Файл сохранён")
