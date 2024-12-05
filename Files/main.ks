@@ -1,6 +1,6 @@
 function WaitBeforeStart {
     clearscreen.
-    set timer to 3.
+    set timer to 10.
     until timer = 0 {
         print timer.
         set timer to timer - 1.
