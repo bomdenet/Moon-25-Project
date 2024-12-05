@@ -40,5 +40,5 @@ with open("Files/Data/KSP_Stats.txt", "r") as f:
 
 #GraphTimeMassa()
 #GraphTimeHeight()
-GraphTimeSpeed()
-#GraphHeightSpeed()
+#GraphTimeSpeed()
+GraphHeightSpeed()
