@@ -19,13 +19,12 @@ function FirstStage {
     lock throttle to 1.
     stage.
 
-    until ship:altitude > 30000 {
-        lock steering to heading(90, 90 - 50 * (ship:altitude / 30000)).
+    until stage:liquidfuel < 1 {
+        lock steering to heading(90, 90 - 70 * (ship:altitude / 50000)).
         wait 0.2.
     }
-    lock steering to heading(90, 20).
 
-    wait until stage:liquidfuel < 1.
+    lock steering to heading(90, 20).
     print "У первой ступени закончилось топливо, начинаю отстыковку".
     lock throttle to 0.
     wait 2.
