@@ -72,6 +72,15 @@ class Math:
         return [float(v1[0] - v2[0] * Math.LengthVector(v1) * numpy.cos(Math.AngleVectors(v1, v2)) / Math.LengthVector(v2)),
                 float(v1[1] - v2[1] * Math.LengthVector(v1) * numpy.cos(Math.AngleVectors(v1, v2)) / Math.LengthVector(v2)),
                 float(v1[2] - v2[2] * Math.LengthVector(v1) * numpy.cos(Math.AngleVectors(v1, v2)) / Math.LengthVector(v2)),]
+    
+    def RotateVector(v, angle):
+        if v[2] < 0:
+            alpha = numpy.arctan(v[0] / v[2]) + angle
+        elif v[2] > 0:
+            alpha = numpy.arctan(v[0] / v[2]) + angle + numpy.pi
+        else:
+            alpha = angle
+        return [numpy.sin(alpha), 0, numpy.cos(alpha)]
 
 
 class Ship:
@@ -174,44 +183,65 @@ class Ship:
 def FixedUpdate():
     Ship._time += Constats.time_skip
 
-    # Обновляем скорость
-    #proectPosF = Math.ProectVV(Ship.position, )
+    '''Обновляем скорость'''
+    # Работа двигателей
+    Ship.velocity = [Ship.velocity[0] + Math.RotateVector(Ship.position, Ship.steering)[0] * Ship.F() * Ship.throttle / Ship.m(),
+                     Ship.velocity[1] + Math.RotateVector(Ship.position, Ship.steering)[1] * Ship.F() * Ship.throttle / Ship.m(),
+                     Ship.velocity[2] + Math.RotateVector(Ship.position, Ship.steering)[2] * Ship.F() * Ship.throttle / Ship.m(),]
 
-
+    # Работа силы тяжести
     Ship.velocity = [Ship.velocity[0] - Ship.position[0] * Ship.g() * Constats.time_skip / Math.LengthVector(Ship.position),
                      Ship.velocity[1] - Ship.position[1] * Ship.g() * Constats.time_skip / Math.LengthVector(Ship.position),
                      Ship.velocity[2] - Ship.position[2] * Ship.g() * Constats.time_skip / Math.LengthVector(Ship.position)]
+    
+    # Сопротивление воздуха
+    Ship.velocity = [Ship.velocity[0] - Ship.velocity[0] * Ship.F_d() / Math.LengthVector(Ship.velocity) / Ship.m(),
+                     Ship.velocity[1] - Ship.velocity[1] * Ship.F_d() / Math.LengthVector(Ship.velocity) / Ship.m(),
+                     Ship.velocity[2] - Ship.velocity[2] * Ship.F_d() / Math.LengthVector(Ship.velocity) / Ship.m()]
+
     if Ship.h() <= 0:
         a = Math.ProectVV(Ship.velocity, Ship.position)
         if a[0] != 0:
             if Ship.position[0] / a[0] < 0:
                 Ship.velocity = Math.ProectVPl(Ship.velocity, Ship.position)
 
-    # Обновляем координаты
+
+    '''Обновляем координаты'''
     Ship.position = [Ship.position[0] + Ship.velocity[0] * Constats.time_skip,
                      Ship.position[1] + Ship.velocity[1] * Constats.time_skip,
                      Ship.position[2] + Ship.velocity[2] * Constats.time_skip]
+    
     if Ship.h() < 0:
         Ship.position = [Ship.position[0] * Constats.radius_Earth / Ship.h_0(),
                          Ship.position[1] * Constats.radius_Earth / Ship.h_0(),
                          Ship.position[2] * Constats.radius_Earth / Ship.h_0()]
 
+    '''Обновляем другие значения'''
+    if Ship.stage == 0:
+        Ship.massa_fuel_first_stage -= Ship.q() * Ship.throttle * Constats.time_skip
+    elif Ship.stage == 1:
+        Ship.massa_fuel_second_stage -= Ship.q() * Ship.throttle * Constats.time_skip
+    elif Ship.stage == 2:
+        Ship.massa_fuel_third_stage -= Ship.q() * Ship.throttle * Constats.time_skip
 
-Ship.throttle = 1
-Ship.steering = 90
-#Ship.velocity[0] = 200
+
+def Script():
+    # Первая ступень
+    Ship.steering = 90
+    Ship.throttle = 1
 
 
-'''a = 0.254
-print(numpy.round(a, 1))
-input()'''
 
+
+ss = "время, масса, высота, скорость"
 a = 0
-while True:
+work = True
+while Ship._time < 80:
     a += 1
     FixedUpdate()
-    if a == 25:
+    if a == 200:
         os.system("cls")
+        print(f"time: {Ship._time:.2f}")
         print(f"position: x: {Ship.position[0]:.2f}, y: {Ship.position[1]:.2f}, z: {Ship.position[2]:.2f}")
         print(f"height: {Ship.h():.2f}")
         print(f"velocity: x: {Ship.velocity[0]:.2f}, y: {Ship.velocity[1]:.2f}, z: {Ship.velocity[2]:.2f}")
@@ -219,17 +249,17 @@ while True:
         print(f"g: {Ship.g():.2f}")
         print(f"F_d: {Ship.F_d():.2f}")
         a = 0
-    time.sleep(Constats.time_skip)
+    #time.sleep(Constats.time_skip * 5)
 
 
 
-'''t = 0
-ss = "время, масса, высота, скорость"
+    ss += f"\n{Ship._time:.2f}, {Ship.m():.2f}, {Ship.h():.2f}, {Ship.U():.2f}"
+
+
+'''
 while Ship.periapsis < 200000:
-    ss += f"\n{t:.2f}, {Ship.massa:.2f}, {Ship.h():.2f}, {Ship.speed:.2f}"
-    t += time_scip
-    time.sleep(time_scip)
+'''
 
 f = open("Files/Data/MathModel_Stats.txt", "w", encoding="UTF-8")
 f.write(ss)
-print("Файл сохранён")'''
+print("Файл сохранён")

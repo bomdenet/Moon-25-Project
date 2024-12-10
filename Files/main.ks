@@ -14,7 +14,7 @@ function WaitBeforeStart {
 function FirstStage {
     clearscreen.
 
-    print "Набираем высоту до 30км".
+    print "Набираем высоту".
     lock steering to heading(90, 90).
     lock throttle to 1.
     stage.
