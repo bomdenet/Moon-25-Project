@@ -45,6 +45,8 @@ class Constats:
     I_0_third_stage = 350
 
     other_massa = 9200
+    C_d = 0.115
+    A_eff = 1.77
 
 
 class Math:
@@ -52,7 +54,9 @@ class Math:
         return (v[0] ** 2 + v[1] ** 2 + v[2] ** 2) ** 0.5
     
     def AngleVectors(v1, v2):
-        return numpy.arccos((v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]) / (Math.LengthVector(v1) * Math.LengthVector(v2)))
+        if Math.LengthVector(v1) != 0 and Math.LengthVector(v2) != 0:
+            return numpy.arccos(numpy.round((v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]) / (Math.LengthVector(v1) * Math.LengthVector(v2)), 5))
+        return 0
     
     def MultiplyVectors(v1, v2):
         return Math.LengthVector(v1) * Math.LengthVector(v2) * numpy.cos(Math.AngleVectors(v1, v2))
@@ -88,7 +92,7 @@ class Ship:
         return Math.LengthVector(Ship.position)
 
     def U():
-        return Math.LengthVector(Ship.velocity) - Constats.angular_velocity_Earth * (Constats.radius_Earth)
+        return Math.LengthVector(Ship.velocity) - Constats.angular_velocity_Earth * Constats.radius_Earth
 
     def I():
         if Ship.stage == 0:
@@ -130,8 +134,11 @@ class Ship:
         elif Ship.stage == 2:
             return Constats.F_0_third_stage - (Constats.F_0_third_stage - Constats.F_1_third_stage) * Ship.P_a() / Constats.P_0
 
+    def F_d():
+        return 0.5 * Ship.p() * (Ship.U() ** 2) * Constats.C_d * Constats.A_eff
+
     def p():
-        return Ship.P_a() / (Constats.R * Ship.T)
+        return Ship.P_a() / (Constats.R * Ship.T())
 
     def g():
         return Constats.G * Constats.massa_Earth / (Constats.radius_Earth + Ship.h()) ** 2
@@ -168,7 +175,9 @@ def FixedUpdate():
     Ship._time += Constats.time_skip
 
     # Обновляем скорость
-    
+    #proectPosF = Math.ProectVV(Ship.position, )
+
+
     Ship.velocity = [Ship.velocity[0] - Ship.position[0] * Ship.g() * Constats.time_skip / Math.LengthVector(Ship.position),
                      Ship.velocity[1] - Ship.position[1] * Ship.g() * Constats.time_skip / Math.LengthVector(Ship.position),
                      Ship.velocity[2] - Ship.position[2] * Ship.g() * Constats.time_skip / Math.LengthVector(Ship.position)]
@@ -190,36 +199,29 @@ def FixedUpdate():
 
 Ship.throttle = 1
 Ship.steering = 90
+#Ship.velocity[0] = 200
 
 
-'''a = [1, 1, 1]
-b = [1, 1, 0]
-print(Math.ProectVPl(a, b))
+'''a = 0.254
+print(numpy.round(a, 1))
 input()'''
 
-a = 999
+a = 0
 while True:
     a += 1
     FixedUpdate()
-    if a == 1000:
+    if a == 25:
         os.system("cls")
-        print(Ship.g())
-        print(Ship.velocity)
-        print(Ship.position)
-        print(Ship.h())
+        print(f"position: x: {Ship.position[0]:.2f}, y: {Ship.position[1]:.2f}, z: {Ship.position[2]:.2f}")
+        print(f"height: {Ship.h():.2f}")
+        print(f"velocity: x: {Ship.velocity[0]:.2f}, y: {Ship.velocity[1]:.2f}, z: {Ship.velocity[2]:.2f}")
+        print(f"speed: {Ship.U():.2f}")
+        print(f"g: {Ship.g():.2f}")
+        print(f"F_d: {Ship.F_d():.2f}")
         a = 0
-    #time.sleep(0.00001)
-    #time.sleep(Constats.time_scip)
+    time.sleep(Constats.time_skip)
 
 
-'''for i in range(1, 60):
-    Ship.h() = 0
-    a0 = (Constats.F_1_first_stage - Ship.q() * Ship.U_e())
-    a = (Constats.F_1_first_stage - Ship.q() * Ship.U_e()) / i * 20 + Ship.P_a()
-    Ship.h() = 200000
-    b0 = (Constats.F_0_first_stage - Ship.q() * Ship.U_e())
-    b = (Constats.F_0_first_stage - Ship.q() * Ship.U_e()) / i * 20 + Ship.P_a()
-    print(f"{i / 20:.2f}, {a:.2f}, {b:.2f}, {a0:.2f}, {b0:.2f}")'''
 
 '''t = 0
 ss = "время, масса, высота, скорость"
