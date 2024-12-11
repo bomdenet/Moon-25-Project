@@ -145,7 +145,8 @@ function OnTheMoon {
     wait until false.
 }
 
-// Доп функции
+
+// Дополнительные функции
 function CheckCanGoToMoon {
     set Vector_Kerbin_Mun to body("Mun"):position - body("Kerbin"):position.
     set Vector_Kerbin_ship to Ship:position - body("Kerbin"):position.

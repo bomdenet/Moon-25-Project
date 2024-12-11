@@ -12,7 +12,7 @@
 ### [План работы🤯](Plan.md)
 
 ## Отчётность🎉
-* [Docs файл с отчётом](https://docs.google.com/document/d/1aa1GSFfqnkaGa5XuCx5iKpty3wXKN4owQneBSS8691o/edit?tab=t.0#heading=h.a10jod99thkr)
+* [Docs файл с отчётом](https://docs.google.com/document/d/1tCns6wsk9_vu7QrfbRe9cxSKaiPnPhmBJsySYgMGwyI/edit?tab=t.0)
 * [Презентация](Presentation.pptx)
 * [Видео полёта](https://youtu.be/97n510te3xY)
 * [Видео отчёт](https://youtu.be/UfrmHkC5Qdw)

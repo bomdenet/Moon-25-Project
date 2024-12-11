@@ -25,18 +25,16 @@ class Constats:
     T_0 = 288.2
 
 
-
     # Параметры связанный с Землёй
-    massa_Earth = 5.29 * 10**22 #5.976 * 10**24
-    radius_Earth = 600000 #6.378 * 10**6
-    angular_velocity_Earth = 7.292 * 10**(-5)
+    massa_Earth = 5.29 * 10**22
+    radius_Earth = 600000
+    angular_velocity_Earth = 2.91 * 10**(-4)
 
 
     # Параметры связанные с ракетой
-
     dry_massa_first_stage = 6890
     massa_fuel_first_stage = 22800
-    q_first_stage = 232.7 #232.7 88.35 0.215
+    q_first_stage = 232.7
     F_1_first_stage = 644135
     F_0_first_stage = 677332
     I_1_first_stage = 285
@@ -44,7 +42,7 @@ class Constats:
 
     dry_massa_second_stage = 8038
     massa_fuel_second_stage = 33200
-    q_second_stage = 207.13 # #364 207.13 0.47
+    q_second_stage = 207.13
     F_1_second_stage = 568750
     F_0_second_stage = 650000
     I_1_second_stage = 280
@@ -52,7 +50,7 @@ class Constats:
 
     dry_massa_third_stage = 2722
     massa_fuel_third_stage = 3993
-    q_third_stage = 72.83# * 1.69 #123 72.83 0.59
+    q_third_stage = 72.83
     F_1_third_stage = 64286
     F_0_third_stage = 250000
     I_1_third_stage = 90
@@ -102,7 +100,7 @@ class Math:
         elif v[2] > 0:
             alpha = numpy.arctan(v[0] / v[2])
         else:
-            alpha = 0
+            alpha = numpy.pi / 2
         return alpha
 
 
@@ -134,7 +132,7 @@ class Ship:
             return Math.LengthVector([velocity[0] - velocity_point()[0], velocity[1] - velocity_point()[1], velocity[2] - velocity_point()[2]])
 
         def velocity_point():
-            return [numpy.cos(Math.FindAngle(position)) * Constats.angular_velocity_Earth * Constats.radius_Earth,
+            return [-numpy.cos(Math.FindAngle(position)) * Constats.angular_velocity_Earth * Constats.radius_Earth,
                     0,
                     numpy.sin(Math.FindAngle(position)) * Constats.angular_velocity_Earth * Constats.radius_Earth]
 
@@ -201,8 +199,8 @@ class Ship:
         else:
             return[0, 0]
 
-    def velocity_point():
-        return [numpy.cos(Math.FindAngle(Ship.position)) * Constats.angular_velocity_Earth * Math.LengthVector(Ship.position),
+    def velocity_orbit():
+        return [-numpy.cos(Math.FindAngle(Ship.position)) * Constats.angular_velocity_Earth * Math.LengthVector(Ship.position),
                 0,
                 numpy.sin(Math.FindAngle(Ship.position)) * Constats.angular_velocity_Earth * Math.LengthVector(Ship.position)]
 
@@ -218,7 +216,7 @@ class Ship:
         return Math.LengthVector(Ship.position) - Constats.radius_Earth
 
     def U():
-        return Math.LengthVector([Ship.velocity[0] - Ship.velocity_point()[0], Ship.velocity[1] - Ship.velocity_point()[1], Ship.velocity[2] - Ship.velocity_point()[2]])
+        return Math.LengthVector([Ship.velocity[0] - Ship.velocity_orbit()[0], Ship.velocity[1] - Ship.velocity_orbit()[1], Ship.velocity[2] - Ship.velocity_orbit()[2]])
 
     def I():
         if Ship.stage == 0:
@@ -408,22 +406,22 @@ class Update:
 
 
 ss = "время, масса, высота, скорость"
+ss += f"\n{Ship._time:.0f}, {Ship.m():.2f}, {Ship.h():.2f}, {Ship.U():.2f}"
 a = 0
 work = True
 while work:
     a += 1
     Update.FixedUpdate()
     Update.Script()
-    if a == 100:
+    if a == 50:
         apoapsis, periapsis = Ship.apoapsis_periapsis()
         os.system("cls")
         print(f"time: {Ship._time:.2f}")
         print(f"eta_apoapsis: {Ship.eta_apoapsis:.2f}")
         print(f"position: x: {Ship.position[0]:.2f}, y: {Ship.position[1]:.2f}, z: {Ship.position[2]:.2f}")
         print(f"height: {Ship.h():.2f}")
-        print(f"apoapsis: {apoapsis:.2f}")
-        print(f"periapsis: {periapsis:.2f}")
         print(f"velocity: x: {Ship.velocity[0]:.2f}, y: {Ship.velocity[1]:.2f}, z: {Ship.velocity[2]:.2f}")
+        print(f"velocity_orbit: x: {Ship.velocity_orbit()[0]:.2f}, y: {Ship.velocity_orbit()[1]:.2f}, z: {Ship.velocity_orbit()[2]:.2f}")
         print(f"speed: {Ship.U():.2f}")
         print(f"throttle: {Ship.throttle:.2f}")
         print(f"steering: {Ship.steering:.2f}")

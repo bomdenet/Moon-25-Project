@@ -39,6 +39,23 @@ def GraphHeightSpeed():
     mtp.plot(height_mm, speed_mm, label='Math model', color=mm_color)
     Save("HeightSpeed")
 
+def ErrorRate():
+    mtp.title("Относительная погрешность")
+    mtp.xlabel("Время, с")
+    mtp.ylabel("Погрешность, %")
+    time = min([time_ksp, time_mm])
+    error_rate_massa = []
+    error_rate_height = []
+    error_rate_speed = []
+    for i in range(10, len(time)):
+        error_rate_massa.append(abs((massa_ksp[i] - massa_mm[i]) / massa_mm[i] * 100))
+        error_rate_height.append(abs((height_ksp[i] - height_mm[i]) / height_mm[i] * 100))
+        error_rate_speed.append(abs((speed_ksp[i] - speed_mm[i]) / speed_mm[i] * 100))
+    mtp.plot(time[10::], error_rate_massa, label='Масса', color=massa_color)
+    mtp.plot(time[10::], error_rate_height, label='Высота', color=height_color)
+    mtp.plot(time[10::], error_rate_speed, label='Скорость', color=speed_color)
+    Save("ErrorRate")
+
 def Save(name):
     mtp.legend()
     mtp.savefig(f"Files/Data/Graphs_KSP/{name}.png")
@@ -73,8 +90,12 @@ with open("Files/Data/MathModel_Stats.txt", "r") as f:
 
 ksp_color = "#008000"
 mm_color = "#ff0000"
+massa_color = "#ff0000"
+height_color = "#008000"
+speed_color = "#0000ff"
 GraphTimeMassa()
 GraphTimeHeight()
 GraphTimeSpeed()
 GraphHeightSpeed()
+ErrorRate()
 print("Графики сохранены в Files/Data/Graphs_KSP")
