@@ -170,9 +170,9 @@ function FindX {
 
     set b1 to ship:mass / ship:maxthrust.
     set b2 to (ship:velocity:surface:mag ^ 2) / (2 * ship:bounds:bottomaltradar).
-    set g to (6.67 * (10 ^ (-11))) * ((7.35 * (10 ^ 22)) / ((1.73 * (10 ^ 6) + ship:bounds:bottomaltradar) ^ 2)).
+    set g to (6.67 * (10 ^ (-11))) * ((9.76 * (10 ^ 20)) / ((200000 + ship:bounds:bottomaltradar) ^ 2)).
 
-    set true_force to b1 * (b2 + g) * 1.01.
+    set true_force to b1 * (b2 + g).
     set work_force to true_force.
     if true_force > 0.5 {
         set work_force to 0.5 + (true_force - 0.5) * 3.

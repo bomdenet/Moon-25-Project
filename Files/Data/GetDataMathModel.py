@@ -30,27 +30,29 @@ class Constats:
 
 
     # Параметры связанные с ракетой
+    multiply_throttle = 5
+
     dry_massa_first_stage = 6890
     massa_fuel_first_stage = 22800
     q_first_stage = 88.35 #409,8 88.35 0.215
-    F_1_first_stage = 247000
-    F_0_first_stage = 260000
+    F_1_first_stage = 247000 * multiply_throttle
+    F_0_first_stage = 260000 * multiply_throttle
     I_1_first_stage = 285
     I_0_first_stage = 300
 
     dry_massa_second_stage = 8038
     massa_fuel_second_stage = 33200
     q_second_stage = 172.13 #364 172.13 0.47
-    F_1_second_stage = 568750
-    F_0_second_stage = 650000
+    F_1_second_stage = 568750 * multiply_throttle
+    F_0_second_stage = 650000 * multiply_throttle
     I_1_second_stage = 280
     I_0_second_stage = 320
 
     dry_massa_third_stage = 2722
     massa_fuel_third_stage = 3993
     q_third_stage = 72.835 #123 72.835 0.59
-    F_1_third_stage = 64286
-    F_0_third_stage = 250000
+    F_1_third_stage = 64286 * multiply_throttle
+    F_0_third_stage = 250000 * multiply_throttle
     I_1_third_stage = 90
     I_0_third_stage = 350
 
@@ -115,6 +117,28 @@ class Ship:
     stage_wait = 0
     wait = 0
 
+    def apoapsis(position, velocity, m):
+        h = []
+        count = 600 / Constats.time_skip
+        while count != 0 and Ship.h(position) > 0:
+            # Работа силы тяжести
+            velocity = [velocity[0] - position[0] * Ship.g(Ship.h(position)) * Constats.time_skip / Math.LengthVector(position),
+                        velocity[1] - position[1] * Ship.g(Ship.h(position)) * Constats.time_skip / Math.LengthVector(position),
+                        velocity[2] - position[2] * Ship.g(Ship.h(position)) * Constats.time_skip / Math.LengthVector(position)]
+            
+            # Сопротивление воздуха
+            velocity = [velocity[0] - velocity[0] * Ship.F_d(position, velocity) * Constats.time_skip / Math.LengthVector(velocity) / m,
+                        velocity[1] - velocity[1] * Ship.F_d(position, velocity) * Constats.time_skip / Math.LengthVector(velocity) / m,
+                        velocity[2] - velocity[2] * Ship.F_d(position, velocity) * Constats.time_skip / Math.LengthVector(velocity) / m]
+            
+            position = [position[0] + velocity[0] * Constats.time_skip,
+                        position[1] + velocity[1] * Constats.time_skip,
+                        position[2] + velocity[2] * Constats.time_skip]
+
+            h.append(Ship.h(position))
+            count -= 1
+        return max(h)
+
     def velocity_point():
         return [numpy.cos(Math.FindAngle(Ship.position)) * Constats.angular_velocity_Earth * Constats.radius_Earth,
                 0,
@@ -122,7 +146,7 @@ class Ship:
 
     def stage_fuel():
         if Ship.stage == 0:
-            return Ship.massa_fuel_first_stage
+            return 4 * Ship.massa_fuel_first_stage
         elif Ship.stage == 1:
             return Ship.massa_fuel_second_stage
         elif Ship.stage == 2:
@@ -158,9 +182,6 @@ class Ship:
         else:
             return Constats.other_massa
 
-    def U_e():
-        return Ship.I() * Ship.g()
-
     def q():
         if Ship.stage == 0:
             return 4 * Constats.q_first_stage * Constats.I_0_first_stage / Ship.I()
@@ -171,7 +192,7 @@ class Ship:
 
     def F():
         if Ship.stage == 0:
-            return 20 * Constats.F_0_first_stage - (Constats.F_0_first_stage - Constats.F_1_first_stage) * Ship.P_a() / Constats.P_0
+            return 4 * Constats.F_0_first_stage - (Constats.F_0_first_stage - Constats.F_1_first_stage) * Ship.P_a() / Constats.P_0
         elif Ship.stage == 1:
             return Constats.F_0_second_stage - (Constats.F_0_second_stage - Constats.F_1_second_stage) * Ship.P_a() / Constats.P_0
         elif Ship.stage == 2:
@@ -214,82 +235,82 @@ class Ship:
         return 1000
 
 
-def FixedUpdate():
-    Ship._time += Constats.time_skip
+class Update:
+    def FixedUpdate():
+        Ship._time += Constats.time_skip
 
-    '''Обновляем скорость'''
-    # Работа двигателей
-    Ship.velocity = [Ship.velocity[0] + Math.RotateVector(Ship.position, 90 - Ship.steering)[0] * Ship.F() * Ship.throttle * Constats.time_skip / Ship.m(),
-                     Ship.velocity[1] + Math.RotateVector(Ship.position, 90 - Ship.steering)[1] * Ship.F() * Ship.throttle * Constats.time_skip / Ship.m(),
-                     Ship.velocity[2] + Math.RotateVector(Ship.position, 90 - Ship.steering)[2] * Ship.F() * Ship.throttle * Constats.time_skip / Ship.m(),]
+        '''Обновляем скорость'''
+        # Работа двигателей
+        Ship.velocity = [Ship.velocity[0] + Math.RotateVector(Ship.position, 90 - Ship.steering)[0] * Ship.F() * Ship.throttle * Constats.time_skip / Ship.m(),
+                         Ship.velocity[1] + Math.RotateVector(Ship.position, 90 - Ship.steering)[1] * Ship.F() * Ship.throttle * Constats.time_skip / Ship.m(),
+                         Ship.velocity[2] + Math.RotateVector(Ship.position, 90 - Ship.steering)[2] * Ship.F() * Ship.throttle * Constats.time_skip / Ship.m(),]
 
-    # Работа силы тяжести
-    Ship.velocity = [Ship.velocity[0] - Ship.position[0] * Ship.g() * Constats.time_skip / Math.LengthVector(Ship.position),
-                     Ship.velocity[1] - Ship.position[1] * Ship.g() * Constats.time_skip / Math.LengthVector(Ship.position),
-                     Ship.velocity[2] - Ship.position[2] * Ship.g() * Constats.time_skip / Math.LengthVector(Ship.position)]
-    
-    # Сопротивление воздуха
-    Ship.velocity = [Ship.velocity[0] - Ship.velocity[0] * Ship.F_d() * Constats.time_skip / Math.LengthVector(Ship.velocity) / Ship.m(),
-                     Ship.velocity[1] - Ship.velocity[1] * Ship.F_d() * Constats.time_skip / Math.LengthVector(Ship.velocity) / Ship.m(),
-                     Ship.velocity[2] - Ship.velocity[2] * Ship.F_d() * Constats.time_skip / Math.LengthVector(Ship.velocity) / Ship.m()]
+        # Работа силы тяжести
+        Ship.velocity = [Ship.velocity[0] - Ship.position[0] * Ship.g() * Constats.time_skip / Math.LengthVector(Ship.position),
+                         Ship.velocity[1] - Ship.position[1] * Ship.g() * Constats.time_skip / Math.LengthVector(Ship.position),
+                         Ship.velocity[2] - Ship.position[2] * Ship.g() * Constats.time_skip / Math.LengthVector(Ship.position)]
+        
+        # Сопротивление воздуха
+        Ship.velocity = [Ship.velocity[0] - Ship.velocity[0] * Ship.F_d() * Constats.time_skip / Math.LengthVector(Ship.velocity) / Ship.m(),
+                         Ship.velocity[1] - Ship.velocity[1] * Ship.F_d() * Constats.time_skip / Math.LengthVector(Ship.velocity) / Ship.m(),
+                         Ship.velocity[2] - Ship.velocity[2] * Ship.F_d() * Constats.time_skip / Math.LengthVector(Ship.velocity) / Ship.m()]
 
-    if Ship.h() <= 0:
-        a = Math.ProectVV(Ship.velocity, Ship.position)
-        if a[0] != 0:
-            if Ship.position[0] / a[0] < 0:
-                Ship.velocity = Math.ProectVPl(Ship.velocity, Ship.position)
-
-
-    '''Обновляем координаты'''
-    Ship.position = [Ship.position[0] + Ship.velocity[0] * Constats.time_skip,
-                     Ship.position[1] + Ship.velocity[1] * Constats.time_skip,
-                     Ship.position[2] + Ship.velocity[2] * Constats.time_skip]
-    
-    if Ship.h() < 0:
-        Ship.position = [Ship.position[0] * Constats.radius_Earth / Ship.h_0(),
-                         Ship.position[1] * Constats.radius_Earth / Ship.h_0(),
-                         Ship.position[2] * Constats.radius_Earth / Ship.h_0()]
-
-    '''Обновляем другие значения'''
-    if Ship.stage == 0:
-        Ship.massa_fuel_first_stage -= Ship.q() * Ship.throttle * Constats.time_skip
-    elif Ship.stage == 1:
-        Ship.massa_fuel_second_stage -= Ship.q() * Ship.throttle * Constats.time_skip
-    elif Ship.stage == 2:
-        Ship.massa_fuel_third_stage -= Ship.q() * Ship.throttle * Constats.time_skip
-    
-    if Ship.wait > 0:
-        Ship.wait -= Constats.time_skip
+        if Ship.h() <= 0:
+            a = Math.ProectVV(Ship.velocity, Ship.position)
+            if a[0] != 0:
+                if Ship.position[0] / a[0] < 0:
+                    Ship.velocity = Math.ProectVPl(Ship.velocity, Ship.position)
 
 
-def Script():
-    # Первая ступень
-    Ship.steering = 90
-    Ship.throttle = 1
+        '''Обновляем координаты'''
+        Ship.position = [Ship.position[0] + Ship.velocity[0] * Constats.time_skip,
+                         Ship.position[1] + Ship.velocity[1] * Constats.time_skip,
+                         Ship.position[2] + Ship.velocity[2] * Constats.time_skip]
+        
+        if Ship.h() < 0:
+            Ship.position = [Ship.position[0] * Constats.radius_Earth / Ship.h_0(),
+                             Ship.position[1] * Constats.radius_Earth / Ship.h_0(),
+                             Ship.position[2] * Constats.radius_Earth / Ship.h_0()]
 
-    if Ship.stage_fuel() > 0: #-10**10
-        Ship.steering = 90 - 70 * (Ship.h() / 50000)
-        return
-
-    Ship.steering = 20
-    Ship.throttle = 0
-    if Ship.stage_wait == 0:
-        Ship.wait = 2
-        Ship.stage_wait = 1
-    else:
+        '''Обновляем другие значения'''
+        if Ship.stage == 0:
+            Ship.massa_fuel_first_stage -= Ship.q() * Ship.throttle * Constats.time_skip
+        elif Ship.stage == 1:
+            Ship.massa_fuel_second_stage -= Ship.q() * Ship.throttle * Constats.time_skip
+        elif Ship.stage == 2:
+            Ship.massa_fuel_third_stage -= Ship.q() * Ship.throttle * Constats.time_skip
+        
         if Ship.wait > 0:
-            return
+            Ship.wait -= Constats.time_skip
 
-    Ship.stage += 1
-    if Ship.stage_wait == 1:
-        Ship.wait = 5
-        Ship.stage_wait = 2
-    else:
-        if Ship.wait > 0:
+    def Script():
+        # Первая ступень
+        if Ship.stage_wait == 0:
+            Ship.steering = 90
+            Ship.throttle = 1
+
+            if Ship.stage_fuel() > 0: #-10**10
+                Ship.steering = 90 - 70 * (Ship.h() / 50000)
+                return
+
+            Ship.steering = 20
+            Ship.throttle = 0
+            Ship.wait = 2
+            Ship.stage_wait = 1
             return
-    
-    global work
-    work = False
+        elif Ship.stage_wait == 1:
+            if Ship.wait > 0:
+                return
+            Ship.stage += 1
+            Ship.wait = 5
+            Ship.stage_wait = 2
+            return
+        elif Ship.stage_wait == 2:
+            if Ship.wait > 0:
+                return
+        
+        global work
+        work = False
 
 
 '''print(numpy.deg2rad(90))
@@ -298,13 +319,16 @@ while True:
     print(Math.RotateVector())'''
 
 
+Ship.velocity = [0, 0, Constats.angular_velocity_Earth * Constats.radius_Earth + 2045]
+Ship.position = [Constats.radius_Earth + 200000, 0, 0]
+
 ss = "время, масса, высота, скорость"
 a = 0
 work = True
 while work:
     a += 1
-    FixedUpdate()
-    Script()
+    Update.FixedUpdate()
+    #Update.Script()
     if a == 50:
         os.system("cls")
         print(f"time: {Ship._time:.2f}")
@@ -315,12 +339,14 @@ while work:
         print(f"throttle: {Ship.throttle:.2f}")
         print(f"steering: {Ship.steering:.2f}")
         print(f"speed: {Ship.U():.2f}")
-        print(f"stage: {Ship.stage:.2f}")
+        print(f"stage: {Ship.stage}")
         print(f"massa: {Ship.m():.2f}")
-        print(f"stage_wait: {Ship.stage_wait:.2f}")
+        print(f"stage_fuel: {Ship.stage_fuel():.2f}")
+        print(f"stage_wait: {Ship.stage_wait}")
         print(f"wait: {Ship.wait:.2f}")
         print(f"F_d: {Ship.F_d():.2f}")
         print(f"p: {Ship.p():.2f}")
+        #print(f"apoapsis: {Ship.apoapsis(Ship.position, Ship.velocity, Ship.m(Ship.stage)):.2f}")
         a = 0
         #input()
     #time.sleep(Constats.time_skip/2)
