@@ -117,27 +117,17 @@ class Ship:
     stage_wait = 0
     wait = 0
 
-    def apoapsis(position, velocity, m):
-        h = []
-        count = 600 / Constats.time_skip
-        while count != 0 and Ship.h(position) > 0:
-            # Работа силы тяжести
-            velocity = [velocity[0] - position[0] * Ship.g(Ship.h(position)) * Constats.time_skip / Math.LengthVector(position),
-                        velocity[1] - position[1] * Ship.g(Ship.h(position)) * Constats.time_skip / Math.LengthVector(position),
-                        velocity[2] - position[2] * Ship.g(Ship.h(position)) * Constats.time_skip / Math.LengthVector(position)]
-            
-            # Сопротивление воздуха
-            velocity = [velocity[0] - velocity[0] * Ship.F_d(position, velocity) * Constats.time_skip / Math.LengthVector(velocity) / m,
-                        velocity[1] - velocity[1] * Ship.F_d(position, velocity) * Constats.time_skip / Math.LengthVector(velocity) / m,
-                        velocity[2] - velocity[2] * Ship.F_d(position, velocity) * Constats.time_skip / Math.LengthVector(velocity) / m]
-            
-            position = [position[0] + velocity[0] * Constats.time_skip,
-                        position[1] + velocity[1] * Constats.time_skip,
-                        position[2] + velocity[2] * Constats.time_skip]
-
-            h.append(Ship.h(position))
-            count -= 1
-        return max(h)
+    def apoapsis():
+        my = Constats.G * Constats.massa_Earth
+        Energ = (Ship.U() ** 2) / 2 - my / Math.LengthVector(Ship.position)
+        a = -my / 2 / Energ
+        e = [(Ship.velocity[0] ** 2) * Ship.position[0] / my - Ship.position[0] / Math.LengthVector(Ship.position),
+             (Ship.velocity[1] ** 2) * Ship.position[1] / my - Ship.position[1] / Math.LengthVector(Ship.position),
+             (Ship.velocity[2] ** 2) * Ship.position[2] / my - Ship.position[2] / Math.LengthVector(Ship.position)]
+        print(f"a: {a:.2f}")
+        print(f"e: x: {e[0]:.2f}, y: {e[1]:.2f}, z: {e[2]:.2f}")
+        print(f"e: {Math.LengthVector(e):.2f}")
+        return a * (1 + Math.LengthVector(e))
 
     def velocity_point():
         return [numpy.cos(Math.FindAngle(Ship.position)) * Constats.angular_velocity_Earth * Constats.radius_Earth,
@@ -154,9 +144,6 @@ class Ship:
 
     def h():
         return Math.LengthVector(Ship.position) - Constats.radius_Earth
-    
-    def h_0():
-        return Math.LengthVector(Ship.position)
 
     def U():
         return Math.LengthVector([Ship.velocity[0] - Ship.velocity_point()[0], Ship.velocity[1] - Ship.velocity_point()[1], Ship.velocity[2] - Ship.velocity_point()[2]])
@@ -268,9 +255,9 @@ class Update:
                          Ship.position[2] + Ship.velocity[2] * Constats.time_skip]
         
         if Ship.h() < 0:
-            Ship.position = [Ship.position[0] * Constats.radius_Earth / Ship.h_0(),
-                             Ship.position[1] * Constats.radius_Earth / Ship.h_0(),
-                             Ship.position[2] * Constats.radius_Earth / Ship.h_0()]
+            Ship.position = [Ship.position[0] * Constats.radius_Earth / Math.LengthVector(Ship.position()),
+                             Ship.position[1] * Constats.radius_Earth / Math.LengthVector(Ship.position()),
+                             Ship.position[2] * Constats.radius_Earth / Math.LengthVector(Ship.position())]
 
         '''Обновляем другие значения'''
         if Ship.stage == 0:
@@ -319,7 +306,7 @@ while True:
     print(Math.RotateVector())'''
 
 
-Ship.velocity = [0, 0, Constats.angular_velocity_Earth * Constats.radius_Earth + 2045]
+Ship.velocity = [0, 0, Constats.angular_velocity_Earth * Constats.radius_Earth + 2056.5]
 Ship.position = [Constats.radius_Earth + 200000, 0, 0]
 
 ss = "время, масса, высота, скорость"
@@ -329,7 +316,7 @@ while work:
     a += 1
     Update.FixedUpdate()
     #Update.Script()
-    if a == 50:
+    if a == 100:
         os.system("cls")
         print(f"time: {Ship._time:.2f}")
         print(f"position: x: {Ship.position[0]:.2f}, y: {Ship.position[1]:.2f}, z: {Ship.position[2]:.2f}")
@@ -346,7 +333,7 @@ while work:
         print(f"wait: {Ship.wait:.2f}")
         print(f"F_d: {Ship.F_d():.2f}")
         print(f"p: {Ship.p():.2f}")
-        #print(f"apoapsis: {Ship.apoapsis(Ship.position, Ship.velocity, Ship.m(Ship.stage)):.2f}")
+        print(f"apoapsis: {Ship.apoapsis():.2f}")
         a = 0
         #input()
     #time.sleep(Constats.time_skip/2)
