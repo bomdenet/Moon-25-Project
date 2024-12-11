@@ -1,10 +1,11 @@
-#               _     _   _____   _____   _____ 
-#              | |   / | |___  | |  ___| |  _  |
-#              | |  // |    _| | | |___  | |_| |
-#              | | //| |   |_  | |  _  | |  _  |
-#              | |// | |  ___| | | |_| | | | | |
-#              |_ /  |_| |_____| |_____| |_| |_|
+#                   _     _   _____   _____   _____ 
+#                  | |   / | |___  | |  ___| |  _  |
+#                  | |  // |    _| | | |___  | |_| |
+#                  | | //| |   |_  | |  _  | |  _  |
+#                  | |// | |  ___| | | |_| | | | | |
+#                  |_ /  |_| |_____| |_____| |_| |_|
 #Во избежания ошибок, проект следует открывать как папку Moon-25-Project
+#    Скрипт автоматически сохраняет графики в Files/Data/Graphs_KSP
 
 
 import matplotlib.pyplot as mtp
@@ -62,7 +63,7 @@ height_mm = []
 speed_mm = []
 with open("Files/Data/MathModel_Stats.txt", "r") as f:
     ss = f.read().split("\n")[1::]
-    for i in range(len(ss)):
+    for i in range(len(ss) - 1):
         ss[i] = ss[i].split(", ")
         time_mm.append(float(ss[i][0]))
         massa_mm.append(float(ss[i][1]) / 1000)
