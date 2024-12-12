@@ -22,7 +22,7 @@ kerbin = conn.space_center.bodies['Kerbin']
 ss = "время, масса, высота, скорость"
 t = 0
 while vessel.orbit.periapsis_altitude < 200000:
-    ss += f"\n{t}, {vessel.mass:.2f}, {vessel.flight(kerbin.reference_frame).mean_altitude:.2f}, {np.linalg.norm(vessel.velocity(kerbin.reference_frame)):.2f}, {vessel.orbit.speed:.2f}"    
+    ss += f"\n{t}, {vessel.mass:.2f}, {vessel.flight(kerbin.reference_frame).mean_altitude:.2f}, {np.linalg.norm(vessel.velocity(kerbin.reference_frame)):.2f}"    
     t += 1
     time.sleep(1)
 
